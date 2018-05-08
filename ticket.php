@@ -3,24 +3,25 @@
 use http\request;
 use tmp\cache;
 
+/**
+ * @see https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421141115
+ */
 class ticket{
 
-  /**
-   * 公众号内嵌网页需要调用JSSDK，首先需要使用token获取ticket，进而计算得到signature
-   * ticket应该在服务端缓存一份，7200秒(两小时)有效期
-   */
-  function __construct(){
-    if($ticket = (string)new cache($this->appid.__CLASS__,$this->secret,7200))
-      return $ticket;
-    else{
-      $result = request::url($this->host.'/cgi-bin/ticket/getticket')
-        ->fecth(['access_token'=>$this->token()])
-        ->json();
-      if(isset($result->ticket)){
-        return (new cache($this->appid.__FUNCTION__,$this->secret))($result->ticket)[0];
-      }else
-        throw new \Exception($result->errmsg, $result->errcode);
-    }
+  private const HOST = 'https://api.weixin.qq.com';
+  public $ticket;
+  
+  final function __construct(token $token, string $type){
+    $this->ticket = new cache($token->appid.$type, $token->appid, 7200, function($type){
+      return request::url(self::HOST.'/cgi-bin/ticket/getticket')
+        ->fetch(['access_token'=>$this->token,'type'=>$type])
+        ->json()->ticket??null;
+    });
+  }
+
+
+  function __toString():string{
+    return $this->ticket;
   }
 
 }
