@@ -2,7 +2,7 @@
 
 use http\request;
 
-class userinfo{
+class user{
 
   public $openid, $nickname, $sex, $province, $city, $country, $headimgurl, $privilege, $unionid;
 
@@ -24,14 +24,25 @@ class userinfo{
    * @param string $lang zh_CN | zh_TW | en
    */
   function __construct(token $token, string $lang='zh_CN'){
-    if($token->scope==='snsapi_userinfo')
-    $response = request::url($token::HOST.'/sns/userinfo')
-      ->fetch(['access_token'=>(string)$token,'openid'=>$token->openid,'lang'=>$lang])//(string)多一道有效性验证和刷token缓存的操作
-      ->json();
 
-    if(empty($response->errcode))
-    foreach($response as $k=>$v)
-      $this->$k = $v;
+      foreach($this->info($token,$lang) as $k=>$v)
+        $this->$k = $v;
+
+  }
+
+
+  private function check(\stdClass $json):\stdClass{
+    if(isset($json->errcode,$json->errmsg)&&$json->errcode)
+      throw new \RuntimeException($json->errmsg,$json->errcode);
+    return $json;
+  }
+
+
+  function info(token $token, string $lang='zh_CN'):\stdClass{
+    return $this->check(request::url($token::HOST.'/sns/userinfo')
+        ->fetch(['access_token'=>$token->access_token,'openid'=>$token->openid,'lang'=>$lang])
+        ->json());
+
   }
 
 }
