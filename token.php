@@ -80,6 +80,7 @@ final class token implements \ArrayAccess{
 
 
   private static function save(string $appid, \stdClass $json):\stdClass{
+    return $json;
     return (new cache($appid.__CLASS__.$json->openid, $appid))($json)[0];
   }
 
