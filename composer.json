@@ -1,0 +1,21 @@
+{
+    "name": "xmlscript/wx",
+    "description": "",
+    "require": {
+        "xmlscript/http": "dev-master",
+        "xmlscript/tmp": "dev-master"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "xmlscript",
+            "email": "xmlscript@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+      "psr-4": {
+        "wx\\": ""
+      }
+    }
+}
