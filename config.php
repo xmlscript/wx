@@ -6,14 +6,14 @@ class config{
 
   function __construct(token $token, string &$url){
     $arr = [
-      'timestamp' => $time=time(),
-      'noncestr' => $nonceStr=md5($time+$_SERVER['REQUEST_TIME_FLOAT']),
+      'timestamp' => $_SERVER['REQUEST_TIME'],
+      'noncestr' => md5($_SERVER['REQUEST_TIME_FLOAT']),
       'jsapi_ticket' => new ticket($token,'jsapi'),
       'url' => $url,
     ];
     sort($arr,SORT_STRING);
-    $this->timestamp = $time;
-    $this->nonceStr = $nonceStr;
+    $this->timestamp = $arr['timestamp'];
+    $this->nonceStr = $arr['noncestr'];
     $this->signature = sha1(http_build_query($arr));
   }
 

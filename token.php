@@ -34,7 +34,7 @@ final class token implements \ArrayAccess{
   }
 
   public const HOST = 'https://api.weixin.qq.com';
-  private $appid;
+  public $appid;
   public $access_token, $expires_in, $refresh_token, $openid, $scope;
 
 
