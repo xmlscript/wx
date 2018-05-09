@@ -79,23 +79,22 @@ final class token implements \ArrayAccess{
   }
 
 
-  private static function save(\stdClass $json):\stdClass{
-    (new cache($appid.__CLASS__.$json->openid, $appid))($json);
-    return $json;
+  private static function save(string $appid, \stdClass $json):\stdClass{
+    return (new cache($appid.__CLASS__.$json->openid, $appid))($json)[0];
   }
 
   /**
    * @todo 刷新之后，refresh_token还是原来那个吗？如果还是一样，那30天失效的判断就无故延长加时了
    */
   private static function refresh(string $appid, string $refresh_token):\stdClass{
-    return self::save(self::check(request::url(self::HOST.'/sns/oauth2/refresh_token')
+    return self::save($appid, self::check(request::url(self::HOST.'/sns/oauth2/refresh_token')
       ->fetch(['appid'=>$appid, 'grant_type'=>'refresh_token', 'refresh_token'=>$refresh_token])
       ->json()));
   }
 
 
   private static function access_token(string $appid, string $secret, string $code):\stdClass{
-    return self::save(self::check(request::url(self::HOST.'/sns/oauth2/access_token')
+    return self::save($appid, self::check(request::url(self::HOST.'/sns/oauth2/access_token')
       ->fetch(['appid'=>$appid,'secret'=>$secret,'code'=>$code,'grant_type'=>'authorization_code'])
       ->json()));
   }
