@@ -38,9 +38,9 @@ final class token implements \ArrayAccess{
   public $access_token, $expires_in, $refresh_token, $openid, $scope;
 
 
-  private function __construct(string $appid, \stdClass $json, bool $replace){
+  private function __construct(string $appid, \stdClass $json){
     $this->appid = $appid;
-    foreach((new cache($appid.__CLASS__.$json->openid, $appid, $replace?:2592000, function() use ($json){return $json;}))[0] as $k=>$v)
+    foreach($json as $k=>$v)
       $this->$k = $v;
   }
 
@@ -50,7 +50,7 @@ final class token implements \ArrayAccess{
    * 时机通常在公众号菜单的link按钮里设置
    */
   static function code(string $appid, string $secret, string $code):self{
-    return new self($appid, self::access_token($appid, $secret, $code), true);
+    return new self($appid, self::access_token($appid, $secret, $code));
   }
 
 
@@ -61,9 +61,9 @@ final class token implements \ArrayAccess{
   static function openid(string $appid, string $openid):self{
     if($cache=(new cache($appid.__CLASS__.$openid, $appid, 2592000))[0])
       if(self::auth($cache->access_token, $cache->openid))
-        return new self($appid, $cache, false);
+        return new self($appid, $cache);
       else
-        return new self($appid, self::refresh($appid, $cache->refresh_token), true);
+        return new self($appid, self::refresh($appid, $cache->refresh_token));
     else
       throw new \RuntimeException;
   }
@@ -81,20 +81,24 @@ final class token implements \ArrayAccess{
   }
 
 
+  private static function save(\stdClass $json):\stdClass{
+    return (new cache($appid.__CLASS__.$json->openid, $appid, 2592000, function() use ($json){return $json;}))[0];
+  }
+
   /**
    * @todo 刷新之后，refresh_token还是原来那个吗？如果还是一样，那30天失效的判断就无故延长加时了
    */
   private static function refresh(string $appid, string $refresh_token):\stdClass{
-    return self::check(request::url(self::HOST.'/sns/oauth2/refresh_token')
+    return self::save(self::check(request::url(self::HOST.'/sns/oauth2/refresh_token')
       ->fetch(['appid'=>$appid, 'grant_type'=>'refresh_token', 'refresh_token'=>$refresh_token])
-      ->json());
+      ->json()));
   }
 
 
   private static function access_token(string $appid, string $secret, string $code):\stdClass{
-    return self::check(request::url(self::HOST.'/sns/oauth2/access_token')
+    return self::save(self::check(request::url(self::HOST.'/sns/oauth2/access_token')
       ->fetch(['appid'=>$appid,'secret'=>$secret,'code'=>$code,'grant_type'=>'authorization_code'])
-      ->json());
+      ->json()));
   }
 
 
