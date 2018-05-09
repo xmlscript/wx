@@ -34,12 +34,10 @@ final class token implements \ArrayAccess{
   }
 
   public const HOST = 'https://api.weixin.qq.com';
-  public $appid;
   public $access_token, $expires_in, $refresh_token, $openid, $scope;
 
 
-  private function __construct(string $appid, \stdClass $json){
-    $this->appid = $appid;
+  private function __construct(\stdClass $json){
     foreach($json as $k=>$v)
       $this->$k = $v;
   }
@@ -50,7 +48,7 @@ final class token implements \ArrayAccess{
    * 时机通常在公众号菜单的link按钮里设置
    */
   static function code(string $appid, string $secret, string $code):self{
-    return new self($appid, self::access_token($appid, $secret, $code));
+    return new self(self::access_token($appid, $secret, $code));
   }
 
 
@@ -61,9 +59,9 @@ final class token implements \ArrayAccess{
   static function openid(string $appid, string $openid):self{
     if($cache=(new cache($appid.__CLASS__.$openid, $appid, 2592000))[0])
       if(self::auth($cache->access_token, $cache->openid))
-        return new self($appid, $cache);
+        return new self($cache);
       else
-        return new self($appid, self::refresh($appid, $cache->refresh_token));
+        return new self(self::refresh($appid, $cache->refresh_token));
     else
       throw new \RuntimeException;
   }
@@ -82,7 +80,8 @@ final class token implements \ArrayAccess{
 
 
   private static function save(\stdClass $json):\stdClass{
-    return (new cache($appid.__CLASS__.$json->openid, $appid, 2592000, function() use ($json){return $json;}))[0];
+    (new cache($appid.__CLASS__.$json->openid, $appid))($json);
+    return $json;
   }
 
   /**
