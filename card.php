@@ -1,4 +1,4 @@
-<?php namespace mp; // vim: se fdm=marker:
+<?php namespace wx; // vim: se fdm=marker:
 
 class card{
 
