@@ -38,11 +38,10 @@ final class token implements \ArrayAccess{
   public $access_token, $expires_in, $refresh_token, $openid, $scope;
 
 
-  private function __construct(string $appid, \stdClass $json){
+  private function __construct(string $appid, \stdClass $json, bool $replace){
     $this->appid = $appid;
-    if($json)
-      foreach($json as $k=>$v)
-        $this->$k = $v;
+    foreach((new cache($appid.__CLASS__.$json->openid, $appid, $replace?:2592000, function() use ($json){return $json;}))[0] as $k=>$v)
+      $this->$k = $v;
   }
 
 
@@ -51,7 +50,7 @@ final class token implements \ArrayAccess{
    * 时机通常在公众号菜单的link按钮里设置
    */
   static function code(string $appid, string $secret, string $code):self{
-    return new self($appid, $this->access_token($appid, $secret, $code));
+    return new self($appid, self::access_token($appid, $secret, $code), true);
   }
 
 
@@ -61,10 +60,10 @@ final class token implements \ArrayAccess{
    */
   static function openid(string $appid, string $openid):self{
     if($cache=(new cache($appid.__CLASS__.$openid, $appid, 2592000))[0])
-      if($this->auth($cache->access_token, $cache->openid))
-        return new self($appid, $cache);
+      if(self::auth($cache->access_token, $cache->openid))
+        return new self($appid, $cache, false);
       else
-        return new self($appid, $this->refresh($appid, $cache->refresh_token));
+        return new self($appid, self::refresh($appid, $cache->refresh_token), true);
     else
       throw new \RuntimeException;
   }
@@ -75,36 +74,31 @@ final class token implements \ArrayAccess{
   }
 
 
-  private function check(\stdClass $json):\stdClass{
+  private static function check(\stdClass $json):\stdClass{
     if(isset($json->errcode,$json->errmsg)&&$json->errcode)
       throw new \RuntimeException($json->errmsg,$json->errcode);
     return $json;
   }
 
 
-  private function write(\stdClass $json):\stdClass{
-    return (new cache($this->appid.__CLASS__.$json->openid, $this->appid, 2592000))($json)[0];
-  }
-
-
   /**
    * @todo 刷新之后，refresh_token还是原来那个吗？如果还是一样，那30天失效的判断就无故延长加时了
    */
-  private function refresh(string $appid, string $refresh_token):\stdClass{
-    return $this->write($this->check(request::url(self::HOST.'/sns/oauth2/refresh_token')
+  private static function refresh(string $appid, string $refresh_token):\stdClass{
+    return self::check(request::url(self::HOST.'/sns/oauth2/refresh_token')
       ->fetch(['appid'=>$appid, 'grant_type'=>'refresh_token', 'refresh_token'=>$refresh_token])
-      ->json()));
+      ->json());
   }
 
 
-  private function access_token(string $appid, string $secret, string $code):\stdClass{
-    return $this->write($this->check(request::url(self::HOST.'/sns/oauth2/access_token')
+  private static function access_token(string $appid, string $secret, string $code):\stdClass{
+    return self::check(request::url(self::HOST.'/sns/oauth2/access_token')
       ->fetch(['appid'=>$appid,'secret'=>$secret,'code'=>$code,'grant_type'=>'authorization_code'])
-      ->json()));
+      ->json());
   }
 
 
-  private function auth(string $access_token, string $openid):bool{
+  private static function auth(string $access_token, string $openid):bool{
     return !request::url(self::HOST.'/sns/auth')
       ->fetch(['access_token'=>$access_token,'openid'=>$openid])
       ->json()
