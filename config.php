@@ -4,7 +4,7 @@ class config{
 
   public $timestamp, $nonceStr, $signature;
 
-  function __construct(mp\token $token, string &$url){
+  function __construct(\mp\token $token, string &$url){
     $arr = [
       'timestamp' => $_SERVER['REQUEST_TIME'],
       'noncestr' => md5($_SERVER['REQUEST_TIME_FLOAT']),
