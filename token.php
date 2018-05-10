@@ -38,8 +38,8 @@ final class token implements \ArrayAccess{
    * 请求token之前，必然要现在让网页作一次跳转以便获得code
    * 时机通常在公众号菜单的link按钮里设置
    */
-  static function code(string $appid, string $secret, string $code):self{
-    return new self(self::access_token($appid, $secret, $code));
+  static function code(string $appid, string $secret):self{
+    return new self(self::access_token($appid, $secret));
   }
 
 
@@ -84,9 +84,9 @@ final class token implements \ArrayAccess{
   }
 
 
-  private static function access_token(string $appid, string $secret, string $code):\stdClass{
+  private static function access_token(string $appid, string $secret):\stdClass{
     return self::save($appid, self::check(request::url(self::HOST.'/sns/oauth2/access_token')
-      ->fetch(['appid'=>$appid,'secret'=>$secret,'code'=>$code,'grant_type'=>'authorization_code'])
+      ->fetch(['appid'=>$appid,'secret'=>$secret,'code'=>$_GET['code']??'','grant_type'=>'authorization_code'])
       ->json()));
   }
 
