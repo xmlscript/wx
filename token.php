@@ -4,15 +4,6 @@ use http\request;
 use tmp\cache;
 
 /**
- * 1. 拼接一个特殊url，引导用户跳转到官方授权页面
- * 2. 如果用户同意授权，则又跳转到redirect_uri/?code=XXX&state=XXX
- * 3. 通过code换取网页授权的access_token，每次授权后code不同，而且只能用一次，而且5分钟后失效！
- * 4. 得到token的同时，也得到了openid，scope和refresh_token
- * 5. 如果scope是base则到此为止
- *
- * 6. 优先使用现成的token，其次考虑用refresh_token重刷新token，最后不得已，再次征求用户授权
- * 7. 继续使用新鲜token获取userinfo
- *
  * @see https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421140842
  */
 final class token implements \ArrayAccess{
@@ -79,9 +70,8 @@ final class token implements \ArrayAccess{
   }
 
 
-  private static function save(string $appid, \stdClass $json):\stdClass{
-    return $json;
-    return (new cache($appid.__CLASS__.$json->openid, $appid))($json)[0];
+  private static function save(string $appid, \stdClass $json):array{
+    return (new cache($appid.__CLASS__.$json->openid, $appid))($json);
   }
 
   /**
