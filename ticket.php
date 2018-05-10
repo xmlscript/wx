@@ -1,4 +1,4 @@
-<?php namespace mp; // vim: se fdm=marker:
+<?php namespace wx; // vim: se fdm=marker:
 
 use http\request;
 use tmp\cache;
@@ -11,8 +11,8 @@ class ticket{
   private const HOST = 'https://api.weixin.qq.com';
   public $ticket;
   
-  final function __construct(token $token, string $type){
-    $this->ticket = new cache($token->appid.$type, $token->refresh_token, 7200, function() use ($token,$type){
+  final function __construct(\mp\token $token, string $type){
+    $this->ticket = new cache($token->appid.$type, $token->appid, 7200, function() use ($token,$type){
       return request::url(self::HOST.'/cgi-bin/ticket/getticket')
         ->fetch(['access_token'=>"$token",'type'=>$type])
         ->json()->ticket??null;
