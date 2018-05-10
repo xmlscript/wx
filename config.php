@@ -21,7 +21,7 @@ class config{
     $this->signature = sha1(urldecode(http_build_query($arr)));//不能转义，所以urldecode中和一下
   }
 
-  static function construct(string &$url){
+  static function construct(string $url){
     $arr = [
       'jsapi_ticket' => 't',
       'noncestr' => md5($_SERVER['REQUEST_TIME_FLOAT']),
