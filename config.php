@@ -11,6 +11,7 @@ class config{
       'jsapi_ticket' => new ticket($token,'jsapi'),
       'url' => $url,
     ];
+    $this->appid = $token->appid;
     $this->timestamp = $arr['timestamp'];
     $this->nonceStr = $arr['noncestr'];
     sort($arr,SORT_STRING);
