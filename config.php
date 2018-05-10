@@ -29,10 +29,12 @@ class config{
       'url' => $url,
     ];
     ksort($arr);//手动按顺序整理好了，这一步多余
-    $this->appid = $token->appid;
-    $this->timestamp = $arr['timestamp'];
-    $this->nonceStr = $arr['noncestr'];
-    $this->signature = sha1(urldecode(http_build_query($arr)));//不能转义，所以urldecode中和一下
+    return [
+    'appid' => $token->appid,
+    'timestamp' => $arr['timestamp'],
+    'nonceStr' => $arr['noncestr'],
+    'signature' => sha1(urldecode(http_build_query($arr)))
+    ];
   }
 
 }
