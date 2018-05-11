@@ -9,9 +9,9 @@ class config{
    */
   function __construct(\mp\token $token, string &$url){
     $arr = [
-      'jsapi_ticket' => new ticket($token,'jsapi'),
+      'jsapi_ticket' => (string)new ticket($token,'jsapi'),
       'noncestr' => md5($_SERVER['REQUEST_TIME_FLOAT']),
-      'timestamp' => (string)$_SERVER['REQUEST_TIME'],
+      'timestamp' => $_SERVER['REQUEST_TIME'],
       'url' => $url,
     ];
     ksort($arr);//手动按顺序整理好了，这一步多余
@@ -20,7 +20,7 @@ class config{
     $this->nonceStr = $arr['noncestr'];
     $this->signature = sha1(urldecode(http_build_query($arr)));//不能转义，所以urldecode中和一下
 
-    $this->__debugInfo = $arr;
+    $this->__debugInfo = urldecode(http_build_query($arr));
   }
 
 }
