@@ -19,6 +19,8 @@ class config{
     $this->timestamp = $arr['timestamp'];
     $this->nonceStr = $arr['noncestr'];
     $this->signature = sha1(urldecode(http_build_query($arr)));//不能转义，所以urldecode中和一下
+
+    $this->__debugInfo = $arr;
   }
 
 }
