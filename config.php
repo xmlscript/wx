@@ -2,11 +2,6 @@
 
 class config{
 
-  public $timestamp, $nonceStr, $signature;
-
-  /**
-   * @see https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=jsapisign
-   */
   function __construct(\mp\token $token, string &$url){
     $arr = [
       'jsapi_ticket' => (string)new ticket($token,'jsapi'),
@@ -14,13 +9,11 @@ class config{
       'timestamp' => $_SERVER['REQUEST_TIME'],
       'url' => $url,
     ];
-    ksort($arr);//手动按顺序整理好了，这一步多余
+    //ksort($arr);
     $this->appId = $token->appid;
     $this->timestamp = $arr['timestamp'];
     $this->nonceStr = $arr['noncestr'];
-    $this->signature = sha1(urldecode(http_build_query($arr)));//不能转义，所以urldecode中和一下
-
-    $this->__debugInfo = urldecode(http_build_query($arr));
+    $this->signature = sha1(urldecode(http_build_query($arr)));
   }
 
 }
