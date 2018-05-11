@@ -11,7 +11,7 @@ class config{
     $arr = [
       'jsapi_ticket' => new ticket($token,'jsapi'),
       'noncestr' => md5($_SERVER['REQUEST_TIME_FLOAT']),
-      'timestamp' => $_SERVER['REQUEST_TIME'],
+      'timestamp' => (string)$_SERVER['REQUEST_TIME'],
       'url' => $url,
     ];
     ksort($arr);//手动按顺序整理好了，这一步多余
