@@ -1,6 +1,6 @@
 <?php namespace wx; // vim: se fdm=marker:
 
-class config{
+final class config{
 
   function __construct(\mp\token $token, string &$url){
     $arr = [
@@ -14,6 +14,10 @@ class config{
     $this->timestamp = $arr['timestamp'];
     $this->nonceStr = $arr['noncestr'];
     $this->signature = sha1(urldecode(http_build_query($arr)));
+  }
+
+  function __toString():string{
+    return json_encode($this);
   }
 
 }
