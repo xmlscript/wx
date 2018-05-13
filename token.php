@@ -64,7 +64,7 @@ final class token implements \ArrayAccess{
   }
 
 
-  private static function check(\stdClass $json):\stdClass{
+  static function check(\stdClass $json):\stdClass{
     if(isset($json->errcode,$json->errmsg)&&$json->errcode)
       throw new \RuntimeException($json->errmsg,$json->errcode);
     return $json;
