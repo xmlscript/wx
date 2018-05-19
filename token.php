@@ -8,6 +8,8 @@ use tmp\cache;
  */
 final class token implements \ArrayAccess{
 
+  private static $err;
+
   function offsetExists($offset){
     return isset($this->$offset);
   }
@@ -33,10 +35,12 @@ final class token implements \ArrayAccess{
       $this->$k = $v;
   }
 
+  function __destruct(){
+    static::$err===42002 and (new cache($this->appid.__CLASS__,'',0))() or static::$err=null;
+  }
+
 
   /**
-   * 请求token之前，必然要现在让网页作一次跳转以便获得code
-   * 时机通常在公众号菜单的link按钮里设置
    * @param string $code 来自$_GET['code']，只能用一次且5分钟失效，不排除开发者延迟异步请求的可能性
    */
   static function code(string $appid, string $secret, string $code):self{
@@ -66,7 +70,7 @@ final class token implements \ArrayAccess{
 
   static function check(\stdClass $json):\stdClass{
     if(isset($json->errcode,$json->errmsg)&&$json->errcode)
-      throw new \RuntimeException($json->errmsg,$json->errcode);
+      throw new \RuntimeException($json->errmsg,static::$err=$json->errcode);
     return $json;
   }
 
